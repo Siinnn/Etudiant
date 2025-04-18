@@ -1,64 +1,32 @@
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
-public class Etudiant {
+class Etudiant {
     private String nom;
-    private LocalDate dateNaissance;
-    private Map<Matiere, Double> notes;
-    private double moyenne;
+    private String adresse;
+    private int dateDeNaissance;
+    private int[] notes;
 
-    public Etudiant(String nom, LocalDate dateNaissance) {
+    public Etudiant(String nom, String adresse, int dateDeNaissance, int[] notes) {
         this.nom = nom;
-        this.dateNaissance = dateNaissance;
-        this.notes = new HashMap<>();
-        this.moyenne = 0.0;
+        this.adresse = adresse;
+        this.dateDeNaissance = dateDeNaissance;
+        this.notes = notes;
     }
 
-    public void ajouterNote(Matiere matiere, double note) {
-        notes.put(matiere, note);
-        calculerMoyenne();
-    }
-
-    private void calculerMoyenne() {
-        double sommeNotes = 0.0;
-        double sommeCoefficients = 0.0;
-
-        for (Map.Entry<Matiere, Double> entry : notes.entrySet()) {
-            Matiere matiere = entry.getKey();
-            double note = entry.getValue();
-            sommeNotes += note * matiere.getCoefficient();
-            sommeCoefficients += matiere.getCoefficient();
-        }
-
-        if (sommeCoefficients > 0) {
-            moyenne = sommeNotes / sommeCoefficients;
+    public void afficher() {
+        System.out.println("Nom: " + nom);
+        System.out.println("Adresse: " + adresse);
+        System.out.println("Date de naissance: " + dateDeNaissance);
+        for (int i = 0; i < notes.length; i++) {
+            System.out.println("Note " + (i + 1) + ": " + notes[i]);
         }
     }
 
-    public String getNom() {
-        return nom;
+    public double calculerMoyenne() {
+        double somme = 0;
+        for (int note : notes) {
+            somme += note;
+        }
+        return somme / notes.length;
     }
 
-    public LocalDate getDateNaissance() {
-        return dateNaissance;
-    }
-
-    public double getMoyenne() {
-        return moyenne;
-    }
-
-    public Map<Matiere, Double> getNotes() {
-        return notes;
-    }
-
-    @Override
-    public String toString() {
-        return "Etudiant{" +
-                "nom='" + nom + '\'' +
-                ", dateNaissance=" + dateNaissance +
-                ", moyenne=" + moyenne +
-                '}';
-    }
-}
+   
 }
