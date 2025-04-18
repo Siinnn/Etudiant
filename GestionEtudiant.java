@@ -8,6 +8,7 @@ public class GestionEtudiant {
     private List<String> matieres;
     private Etudiant[] etudiants;
     private int effectif;
+    private boolean listeInitialisee = false;
 
     public GestionEtudiant() {
         this.matieres = new ArrayList<>();
@@ -24,6 +25,49 @@ public class GestionEtudiant {
     public void demarrer() {
         Scanner scanner = new Scanner(System.in);
 
+        if (!listeInitialisee) {
+            initialiserListeEtudiants(scanner);
+        }
+
+        // Affichage du menu
+        boolean quitter = false;
+        while (!quitter) {
+            afficherMenu();
+            int choix = scanner.nextInt();
+            scanner.nextLine(); // Pour consommer le retour à la ligne
+
+            switch (choix) {
+                case 1:
+                    afficherParOrdreDeMetite();
+                    break;
+                case 2:
+                    afficherPremierEtudiant();
+                    break;
+                case 3:
+                    afficherDernierEtudiant();
+                    break;
+                case 4:
+                    reinitialiserListe();
+                    System.out.println("La liste a été réinitialisée.");
+                    System.out.print("Voulez-vous saisir une nouvelle liste d'étudiants? (o/n): ");
+                    String reponse = scanner.nextLine().trim().toLowerCase();
+                    if (reponse.equals("o") || reponse.equals("oui")) {
+                        initialiserListeEtudiants(scanner);
+                    }
+                    break;
+                case 5:
+                    quitter = true;
+                    System.out.println("Au revoir !");
+                    break;
+                default:
+                    System.out.println("Choix invalide. Veuillez réessayer.");
+            }
+        }
+
+        // Ne pas fermer le scanner pour éviter les problèmes avec System.in
+    }
+
+    private void initialiserListeEtudiants(Scanner scanner) {
         System.out.print("Entrez l'effectif de la classe : ");
         effectif = scanner.nextInt();
         scanner.nextLine(); // Pour consommer le retour à la ligne
@@ -54,37 +98,8 @@ public class GestionEtudiant {
             etudiants[i] = new Etudiant(matricule, nom, dateNaissance, notes);
         }
 
-        // Affichage du menu
-        boolean quitter = false;
-        while (!quitter) {
-            afficherMenu();
-            int choix = scanner.nextInt();
-            scanner.nextLine(); // Pour consommer le retour à la ligne
-
-            switch (choix) {
-                case 1:
-                    afficherParOrdreDeMetite();
-                    break;
-                case 2:
-                    afficherPremierEtudiant();
-                    break;
-                case 3:
-                    afficherDernierEtudiant();
-                    break;
-                case 4:
-                    reinitialiserListe();
-                    System.out.println("La liste a été réinitialisée.");
-                    break;
-                case 5:
-                    quitter = true;
-                    System.out.println("Au revoir !");
-                    break;
-                default:
-                    System.out.println("Choix invalide. Veuillez réessayer.");
-            }
-        }
-
-        scanner.close();
+        listeInitialisee = true;
+        System.out.println("\nListe d'étudiants initialisée avec succès!");
     }
 
     private void afficherMenu() {
@@ -98,7 +113,7 @@ public class GestionEtudiant {
     }
 
     private void afficherParOrdreDeMetite() {
-        if (etudiants == null || etudiants.length == 0) {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
             System.out.println("Aucun étudiant enregistré.");
             return;
         }
@@ -128,7 +143,7 @@ public class GestionEtudiant {
     }
 
     private void afficherPremierEtudiant() {
-        if (etudiants == null || etudiants.length == 0) {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
             System.out.println("Aucun étudiant enregistré.");
             return;
         }
@@ -146,7 +161,7 @@ public class GestionEtudiant {
     }
 
     private void afficherDernierEtudiant() {
-        if (etudiants == null || etudiants.length == 0) {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
             System.out.println("Aucun étudiant enregistré.");
             return;
         }
@@ -164,7 +179,8 @@ public class GestionEtudiant {
     }
 
     private void reinitialiserListe() {
-        etudiants = new Etudiant[effectif];
+        etudiants = null;
+        listeInitialisee = false;
     }
 
     public static void main(String[] args) {
