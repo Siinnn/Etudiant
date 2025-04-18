@@ -1,105 +1,190 @@
-import java.util.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
 public class GestionEtudiant {
-    private List<Matiere> matieres;
-    private List<Etudiant> etudiants;
+    private List<String> matieres;
+    private Etudiant[] etudiants;
+    private int effectif;
+    private boolean listeInitialisee = false;
 
     public GestionEtudiant() {
         this.matieres = new ArrayList<>();
-        this.etudiants = new ArrayList<>();
         initialiserMatieres();
     }
 
     private void initialiserMatieres() {
-        matieres.add(new Matiere("Mathématiques", 4));
-        matieres.add(new Matiere("Physique", 3));
-        matieres.add(new Matiere("Informatique", 3));
-        matieres.add(new Matiere("Anglais", 2));
+        matieres.add("Mathématiques");
+        matieres.add("Physique");
+        matieres.add("Informatique");
+        matieres.add("Anglais");
     }
 
-    public void ajouterEtudiant(Etudiant etudiant) {
-        etudiants.add(etudiant);
-    }
+    public void demarrer() {
+        Scanner scanner = new Scanner(System.in);
 
-    public void ajouterNote(Etudiant etudiant, Matiere matiere, double note) {
-        etudiant.ajouterNote(matiere, note);
-    }
-
-    public List<Etudiant> getEtudiantsParMerite() {
-        List<Etudiant> etudiantsTries = new ArrayList<>(etudiants);
-        etudiantsTries.sort((e1, e2) -> Double.compare(e2.getMoyenne(), e1.getMoyenne()));
-        return etudiantsTries;
-    }
-
-    public Etudiant getPremierEtudiant() {
-        if (etudiants.isEmpty()) {
-            return null;
+        if (!listeInitialisee) {
+            initialiserListeEtudiants(scanner);
         }
-        return getEtudiantsParMerite().get(0);
-    }
 
-    public Etudiant getDernierEtudiant() {
-        if (etudiants.isEmpty()) {
-            return null;
+        // Affichage du menu
+        boolean quitter = false;
+        while (!quitter) {
+            afficherMenu();
+            int choix = scanner.nextInt();
+            scanner.nextLine(); // Pour consommer le retour à la ligne
+
+            switch (choix) {
+                case 1:
+                    afficherParOrdreDeMetite();
+                    break;
+                case 2:
+                    afficherPremierEtudiant();
+                    break;
+                case 3:
+                    afficherDernierEtudiant();
+                    break;
+                case 4:
+                    reinitialiserListe();
+                    System.out.println("La liste a été réinitialisée.");
+                    System.out.print("Voulez-vous saisir une nouvelle liste d'étudiants? (o/n): ");
+                    String reponse = scanner.nextLine().trim().toLowerCase();
+                    if (reponse.equals("o") || reponse.equals("oui")) {
+                        initialiserListeEtudiants(scanner);
+                    }
+                    break;
+                case 5:
+                    quitter = true;
+                    System.out.println("Au revoir !");
+                    break;
+                default:
+                    System.out.println("Choix invalide. Veuillez réessayer.");
+            }
         }
-        List<Etudiant> etudiantsTries = getEtudiantsParMerite();
-        return etudiantsTries.get(etudiantsTries.size() - 1);
+
+        // Ne pas fermer le scanner pour éviter les problèmes avec System.in
     }
 
-    public void reinitialiserListe() {
-        etudiants.clear();
+    private void initialiserListeEtudiants(Scanner scanner) {
+        System.out.print("Entrez l'effectif de la classe : ");
+        effectif = scanner.nextInt();
+        scanner.nextLine(); // Pour consommer le retour à la ligne
+
+        etudiants = new Etudiant[effectif];
+
+        // Enregistrement des étudiants
+        for (int i = 0; i < effectif; i++) {
+            System.out.println("\nÉtudiant " + (i + 1));
+            System.out.print("Matricule : ");
+            String matricule = scanner.nextLine();
+
+            System.out.print("Nom : ");
+            String nom = scanner.nextLine();
+
+            System.out.print("Date de naissance (AAAAMMJJ) : ");
+            int dateNaissance = scanner.nextInt();
+            scanner.nextLine(); // Pour consommer le retour à la ligne
+
+            // Création du tableau de notes
+            double[] notes = new double[matieres.size()];
+            for (int j = 0; j < matieres.size(); j++) {
+                System.out.print("Note en " + matieres.get(j) + " : ");
+                notes[j] = scanner.nextDouble();
+                scanner.nextLine(); // Pour consommer le retour à la ligne
+            }
+
+            etudiants[i] = new Etudiant(matricule, nom, dateNaissance, notes);
+        }
+
+        listeInitialisee = true;
+        System.out.println("\nListe d'étudiants initialisée avec succès!");
     }
 
-    public List<Matiere> getMatieres() {
-        return matieres;
+    private void afficherMenu() {
+        System.out.println("\n===== MENU =====");
+        System.out.println("1. Afficher les étudiants par ordre de mérite");
+        System.out.println("2. Afficher les informations sur le premier étudiant");
+        System.out.println("3. Afficher les informations du dernier étudiant");
+        System.out.println("4. Réinitialiser la liste de la classe");
+        System.out.println("5. Quitter le programme");
+        System.out.print("Votre choix : ");
     }
 
-    public List<Etudiant> getEtudiants() {
-        return etudiants;
+    private void afficherParOrdreDeMetite() {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
+            System.out.println("Aucun étudiant enregistré.");
+            return;
+        }
+
+        // Créer une liste temporaire pour le tri
+        List<Etudiant> etudiantsTries = new ArrayList<>();
+        for (Etudiant e : etudiants) {
+            if (e != null) {
+                etudiantsTries.add(e);
+            }
+        }
+
+        // Trier par moyenne décroissante
+        Collections.sort(etudiantsTries, new Comparator<Etudiant>() {
+            @Override
+            public int compare(Etudiant e1, Etudiant e2) {
+                return Double.compare(e2.calculerMoyenne(), e1.calculerMoyenne());
+            }
+        });
+
+        // Afficher les étudiants triés
+        System.out.println("\n=== ÉTUDIANTS PAR ORDRE DE MÉRITE ===");
+        for (int i = 0; i < etudiantsTries.size(); i++) {
+            System.out.println("\nRang " + (i + 1) + " :");
+            etudiantsTries.get(i).afficher();
+        }
+    }
+
+    private void afficherPremierEtudiant() {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
+            System.out.println("Aucun étudiant enregistré.");
+            return;
+        }
+
+        // Trouver l'étudiant avec la meilleure moyenne
+        Etudiant meilleur = etudiants[0];
+        for (int i = 1; i < etudiants.length; i++) {
+            if (etudiants[i] != null && etudiants[i].calculerMoyenne() > meilleur.calculerMoyenne()) {
+                meilleur = etudiants[i];
+            }
+        }
+
+        System.out.println("\n=== PREMIER ÉTUDIANT ===");
+        meilleur.afficher();
+    }
+
+    private void afficherDernierEtudiant() {
+        if (!listeInitialisee || etudiants == null || etudiants.length == 0) {
+            System.out.println("Aucun étudiant enregistré.");
+            return;
+        }
+
+        // Trouver l'étudiant avec la moins bonne moyenne
+        Etudiant dernier = etudiants[0];
+        for (int i = 1; i < etudiants.length; i++) {
+            if (etudiants[i] != null && etudiants[i].calculerMoyenne() < dernier.calculerMoyenne()) {
+                dernier = etudiants[i];
+            }
+        }
+
+        System.out.println("\n=== DERNIER ÉTUDIANT ===");
+        dernier.afficher();
+    }
+
+    private void reinitialiserListe() {
+        etudiants = null;
+        listeInitialisee = false;
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Entrez l'effectif de la classe : ");
-        int n = scanner.nextInt();
-        scanner.nextLine();
-
-        Etudiant[] etudiants = new Etudiant[n];
-
-        for (int i = 0; i < n; i++) {
-            System.out.println("\nEtudiant " + (i + 1) + " :");
-            System.out.print("Nom : ");
-            String nom = scanner.nextLine();
-            System.out.print("Date de naissance (AAAA-MM-JJ) : ");
-            LocalDate dateNaissance = LocalDate.parse(scanner.nextLine());
-            System.out.print("Moyenne : ");
-            double moyenne = scanner.nextDouble();
-            scanner.nextLine();
-
-            etudiants[i] = new Etudiant( nom, dateNaissance, moyenne);
-        }
+        GestionEtudiant gestion = new GestionEtudiant();
+        gestion.demarrer();
     }
 }
-public class Matiere {
-    private String nom;
-    private double coefficient;
-
-    public Matiere(String nom, double coefficient) {
-        this.nom = nom;
-        this.coefficient = coefficient;
-    }
-
-    public String getNom() {
-        return nom;
-    }
-
-    public double getCoefficient() {
-        return coefficient;
-    }
-} 
